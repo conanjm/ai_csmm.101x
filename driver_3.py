@@ -62,8 +62,8 @@ class state(object):
             if i < 3:
                 raise MoveNotPossible
             else:
-                temp = copy[i-2*3]
-                copy[i-2*3] = copy[i]
+                temp = copy[i-3]
+                copy[i-3] = copy[i]
                 copy[i] = temp
             lbl = 'Up'
             return copy, lbl
@@ -123,9 +123,11 @@ class state(object):
         return children
         
 def solve_bfs(first_state):
+
+    """ Breadth First Search """
     
     to_visit = []
-    visited = []
+    visited = set()
     current_state = state(first_state, 'first', 'NoParent' )
     to_visit.append(current_state)
     
@@ -133,34 +135,65 @@ def solve_bfs(first_state):
         
         if current_state.is_goal() == True :
 
-            visited.append(current_state)
+            visited.add(current_state)
             to_visit.remove(current_state)
             break            
         else:
             children = current_state.generate_children()
                     
             for i in children:
-                if i.get_data() not in visited:
+                if (i not in visited) and (i not in to_visit):
                     to_visit.append(i)
-            visited.append(current_state)
+            visited.add(current_state)
             to_visit.remove(current_state)
-            print(i.get_data() in to_visit)
             current_state = to_visit[0]
 
-    path_reversed = []
+    path = []
     while current_state.get_parent() != 'NoParent':
-        path_reversed.append(current_state.get_label())
+        path.append(current_state.get_label())
         current_state = current_state.get_parent()
-        print(path_reversed, 'path_reversed ')
-    print(path_reversed.reverse(), 'path_reversed after')    
-    
-    
-    
-    return path_reversed.reverse()
-    
-l = [1,2,0,3,4,5,6,7,8]
+               
+    path.reverse()   
+    return path
 
-print(solve_bfs(l), 'path')
+def solve_dfs(first_state):
+    """Depth First Search"""
+
+    to_visit = []
+    visited = set()
+    current_state = state(first_state, 'first', 'NoParent' )
+    to_visit.append(current_state)
+    
+    while True:
+        
+        if current_state.is_goal() == True :
+
+            visited.add(current_state)
+            to_visit.remove(current_state)
+            break            
+        else:
+            children = current_state.generate_children()
+            children.reverse()
+                    
+            for i in children:
+                if (i not in visited) and (i not in to_visit):
+                    to_visit.append(i)
+            visited.add(current_state)
+            to_visit.remove(current_state)
+            current_state = to_visit[-1]
+
+    path = []
+    while current_state.get_parent() != 'NoParent':
+        path.append(current_state.get_label())
+        current_state = current_state.get_parent()
+               
+    path.reverse()   
+    return path
+    
+l = [1,0,2,3,4,5,6,7,8]
+
+print(solve_bfs(l), 'path_bfs')
+print(solve_dfs(l), 'path_dfs')
         
             
             
