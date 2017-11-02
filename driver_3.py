@@ -7,7 +7,8 @@ Created on Sat Oct 21 19:37:02 2017
 import numpy
 import sys
 import time
-import resource
+import os
+import psutil
 
 class MoveNotPossible(Exception):
 
@@ -169,8 +170,8 @@ class solver(object):
         current_state = self.start
         self.all_state_set.add(str(current_state.data))
         while True:
-            if not len(self.visited)%1000:
-                print (len(self.visited))
+            #if not len(self.visited)%1000:
+                #print (len(self.visited))
             self.visited.add(str(current_state.data))
                         
             if current_state.is_goal() == True :  
@@ -202,6 +203,7 @@ class solver(object):
         return path
 
     def solve(self):
+        s = time.time()
         if self.method == 'bfs':
             state = self.solve_bfs()
 
@@ -210,7 +212,7 @@ class solver(object):
 
         path = self.find_path(state)
         self.running_time = time.time() - s
-        self.max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/(1024*1024)
+        self.max_ram_usage = psutil.Process(os.getpid()).memory_info().rss/(1024*1024)
 
         f = open("output.txt","w")
         f.write("path_to_goal: " + str(path) + "\n")
@@ -222,13 +224,22 @@ class solver(object):
         f.write("max_ram_usage: " + "%.8f" %self.max_ram_usage + "\n")
         f.close() 
 
-    
-l = [1,2,5,3,4,0,6,7,8]
-g = solver(l,'dfs')
+def main(script, *args):
 
-g.solve()
+    state_list = []
+    for j, item in enumerate(args[1]):
+        if j%2==0:
+            state_list.append(int(item))
+    #print(len(state_list), state_list)
 
-        
+    method = str(args[0])
+
+    g = solver(state_list,method)
+    g.solve()
+
+if __name__ == '__main__':
+    import sys
+    main(*sys.argv)     
             
             
         
